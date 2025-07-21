@@ -1,4 +1,5 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3002';
+// Production에서는 같은 도메인을 사용하므로 빈 문자열 사용 (상대 경로)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '' : 'http://localhost:3002');
 
 export interface ApiResponse<T> {
   success: boolean;
