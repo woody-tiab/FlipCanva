@@ -114,6 +114,10 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
     );
 
     if (result) {
+      console.log('🎉 Process completed with result:', result);
+      console.log('🎯 Current processingStatus:', processingStatus);
+      console.log('🎯 isSuccess check:', processingStatus === 'success');
+      setStatus('success', { currentStep: '플립북이 성공적으로 생성되었습니다!' });
       onSuccess?.(result);
     }
   };
@@ -135,6 +139,15 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
 
   const isProcessing = isLoading || isRetrying;
   const isSuccess = processingStatus === 'success';
+
+  // 디버깅용 로그
+  console.log('🔍 FlipbookProcessor render:', {
+    isProcessing,
+    isSuccess,
+    processingStatus,
+    hasError,
+    currentError
+  });
 
   return (
     <div className="flipbook-processor">
