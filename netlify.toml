@@ -6,18 +6,8 @@
   NODE_VERSION = "18"
 
 [[redirects]]
-  from = "/api/canva/*"
-  to = "/.netlify/functions/canva/:splat"
-  status = 200
-
-[[redirects]]
-  from = "/api/flipbooks/*"  
-  to = "/.netlify/functions/flipbooks/:splat"
-  status = 200
-
-[[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
 
 [[redirects]]
