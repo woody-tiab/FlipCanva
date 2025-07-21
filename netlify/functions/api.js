@@ -215,7 +215,10 @@ exports.handler = async (event, context) => {
           return {
             statusCode: 201,
             headers,
-            body: JSON.stringify(flipbook),
+            body: JSON.stringify({
+              success: true,
+              data: flipbook
+            }),
           };
 
         default:
