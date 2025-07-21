@@ -185,7 +185,28 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
           <div className="success-message">
             <h4>✅ 플립북이 성공적으로 생성되었습니다!</h4>
             <p>디자인 ID: <code>{designId}</code>로부터 플립북을 생성했습니다.</p>
+            {completedResult && (
+              <div className="flipbook-details">
+                <h5>생성된 플립북 정보:</h5>
+                <ul>
+                  <li><strong>플립북 ID:</strong> {completedResult.flipbook?.id}</li>
+                  <li><strong>제목:</strong> {completedResult.flipbook?.title}</li>
+                  <li><strong>페이지 수:</strong> {completedResult.exportData?.totalPages || 0}개</li>
+                  <li><strong>생성 시간:</strong> {completedResult.flipbook?.createdAt ? new Date(completedResult.flipbook.createdAt).toLocaleString('ko-KR') : 'N/A'}</li>
+                </ul>
+              </div>
+            )}
             <div className="success-actions">
+              <button 
+                className="view-flipbook-button"
+                onClick={() => {
+                  if (completedResult?.flipbook?.id) {
+                    alert(`플립북 ID: ${completedResult.flipbook.id}\n\n실제 플립북 뷰어는 향후 구현될 예정입니다.\n현재는 Mock 데이터로 플립북 생성을 시뮬레이션했습니다.`);
+                  }
+                }}
+              >
+                📖 플립북 보기
+              </button>
               <button 
                 className="new-flipbook-button"
                 onClick={() => {
