@@ -20,6 +20,9 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
   onSuccess,
   onCancel
 }) => {
+  const [isCompleted, setIsCompleted] = React.useState(false);
+  const [completedResult, setCompletedResult] = React.useState<any>(null);
+
   const {
     hasError,
     isLoading,
@@ -105,6 +108,9 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
   };
 
   const handleProcess = async () => {
+    setIsCompleted(false);
+    setCompletedResult(null);
+    
     const result = await executeWithErrorHandling(
       processCanvaDesign,
       {
@@ -116,8 +122,10 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
     if (result) {
       console.log('🎉 Process completed with result:', result);
       console.log('🎯 Current processingStatus:', processingStatus);
-      console.log('🎯 isSuccess check:', processingStatus === 'success');
-      setStatus('success', { currentStep: '플립북이 성공적으로 생성되었습니다!' });
+      console.log('🎯 Setting isCompleted to true');
+      
+      setIsCompleted(true);
+      setCompletedResult(result);
       onSuccess?.(result);
     }
   };
@@ -138,15 +146,17 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
   };
 
   const isProcessing = isLoading || isRetrying;
-  const isSuccess = processingStatus === 'success';
+  const isSuccess = isCompleted && !hasError;
 
   // 디버깅용 로그
   console.log('🔍 FlipbookProcessor render:', {
     isProcessing,
     isSuccess,
+    isCompleted,
     processingStatus,
     hasError,
-    currentError
+    currentError,
+    completedResult
   });
 
   return (
@@ -179,6 +189,8 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
               <button 
                 className="new-flipbook-button"
                 onClick={() => {
+                  setIsCompleted(false);
+                  setCompletedResult(null);
                   clearError();
                   setStatus('idle');
                 }}
