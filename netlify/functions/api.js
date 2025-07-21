@@ -177,8 +177,15 @@ exports.handler = async (event, context) => {
     }
 
     // === FLIPBOOK API ROUTES ===
-    if (path.startsWith('/flipbooks')) {
-      const flipbookPath = path.replace('/flipbooks', '');
+    const isFlipbookAPI = xOriginalURL.includes('/flipbooks') || apiPath.includes('/flipbooks');
+    
+    if (isFlipbookAPI) {
+      let flipbookPath = '';
+      if (xOriginalURL.includes('/flipbooks')) {
+        flipbookPath = xOriginalURL.split('/flipbooks')[1] || '';
+      }
+      
+      console.log('📚 Flipbook route detected. flipbookPath:', flipbookPath);
       
       switch (true) {
         case flipbookPath === '/test' && method === 'GET':
@@ -192,7 +199,7 @@ exports.handler = async (event, context) => {
             }),
           };
 
-        case flipbookPath === '' && method === 'POST':
+        case (flipbookPath === '' || flipbookPath === '/') && method === 'POST':
           const flipbook = {
             id: uuidv4(),
             ...body,
