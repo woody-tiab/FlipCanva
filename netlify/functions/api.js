@@ -72,22 +72,42 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    // Netlify에서 :splat으로 전달되는 경로 처리
-    const path = event.path.includes('/.netlify/functions/api') 
-      ? event.path.replace('/.netlify/functions/api', '')
-      : '/' + (event.queryStringParameters?.splat || '');
+    // Headers에서 원본 URL 추출
+    const originalUrl = event.headers['x-forwarded-proto'] + '://' + event.headers['host'] + event.headers['x-nf-request-id'] || event.path;
+    const referer = event.headers.referer || '';
+    
+    console.log('🎯 Event path:', event.path);
+    console.log('🎯 Headers host:', event.headers.host);
+    console.log('🎯 Referer:', referer);
+    console.log('🎯 All headers:', JSON.stringify(event.headers, null, 2));
+    
+    // URL에서 /api/ 이후 경로 추출
+    let apiPath = '/';
+    
+    // event.path에서 추출 시도
+    if (event.path && event.path !== '/.netlify/functions/api') {
+      apiPath = event.path;
+    }
     
     const method = event.httpMethod;
     const body = event.body ? JSON.parse(event.body) : {};
 
-    console.log('🎯 Original path:', event.path);
-    console.log('🎯 Processed path:', path, 'Method:', method, 'Body:', body);
+    console.log('🎯 Final API path:', apiPath, 'Method:', method);
 
-    // === CANVA API ROUTES ===
-    if (path.includes('/canva/') || path.includes('canva/')) {
-      const canvaPath = path.includes('/canva/') 
-        ? path.split('/canva/')[1] 
-        : path.split('canva/')[1];
+    // === CANVA API ROUTES === 
+    // Headers에서 원본 요청 경로 확인
+    const xOriginalURL = event.headers['x-nf-original-url'] || '';
+    const isCanvaAPI = xOriginalURL.includes('/api/canva/') || apiPath.includes('/canva/');
+    
+    console.log('🎯 X-NF-Original-URL:', xOriginalURL);
+    console.log('🎯 Is Canva API:', isCanvaAPI);
+    
+    if (isCanvaAPI) {
+      // 원본 URL에서 endpoint 추출
+      let canvaPath = 'validate-design'; // 기본값
+      if (xOriginalURL.includes('/api/canva/')) {
+        canvaPath = xOriginalURL.split('/api/canva/')[1] || 'validate-design';
+      }
       
       console.log('🎨 Canva route detected. canvaPath:', canvaPath);
       
