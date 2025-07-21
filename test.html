@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캔바 링크 검증 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #7c3aed;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success { background: #f0fdf4; border: 1px solid #bbf7d0; }
+        .error { background: #fef2f2; border: 1px solid #fecaca; }
+    </style>
+</head>
+<body>
+    <h1>캔바 링크 검증 테스트</h1>
+    <input type="text" id="urlInput" placeholder="https://www.canva.com/design/DAGh8bZ9l9E/6CESpszvVlTFIEL6J2pf7w/edit">
+    <button onclick="testValidation()">검증하기</button>
+    <div id="result"></div>
+
+    <script>
+        const CANVA_LINK_PATTERNS = [
+            {
+                type: 'DESIGN_VIEW',
+                pattern: /^https?:\/\/(?:www\.)?canva\.com\/design\/([A-Za-z0-9_-]+)\/[A-Za-z0-9_-]+\/view(?:\?.*)?$/,
+                extractDesignId: (match) => match[1]
+            },
+            {
+                type: 'DESIGN_EDIT',
+                pattern: /^https?:\/\/(?:www\.)?canva\.com\/design\/([A-Za-z0-9_-]+)\/[A-Za-z0-9_-]+\/edit(?:\?.*)?$/,
+                extractDesignId: (match) => match[1]
+            },
+            {
+                type: 'DESIGN_TEMPLATE',
+                pattern: /^https?:\/\/(?:www\.)?canva\.com\/design\/([A-Za-z0-9_-]+)\/[A-Za-z0-9_-]+\/template(?:\?.*)?$/,
+                extractDesignId: (match) => match[1]
+            },
+            {
+                type: 'DESIGN_VIEW',
+                pattern: /^https?:\/\/(?:www\.)?canva\.com\/design\/([A-Za-z0-9_-]+)\/view(?:\?.*)?$/,
+                extractDesignId: (match) => match[1]
+            },
+            {
+                type: 'DESIGN_EDIT',
+                pattern: /^https?:\/\/(?:www\.)?canva\.com\/design\/([A-Za-z0-9_-]+)\/edit(?:\?.*)?$/,
+                extractDesignId: (match) => match[1]
+            },
+            {
+                type: 'DESIGN_ID_ONLY',
+                pattern: /^([A-Za-z0-9_-]{10,})$/,
+                extractDesignId: (match) => match[1]
+            }
+        ];
+
+        function extractDesignIdFromUrl(input) {
+            if (!input || typeof input !== 'string') {
+                return {
+                    isValid: false,
+                    errorMessage: '입력값이 유효하지 않습니다.'
+                };
+            }
+
+            const trimmedInput = input.trim();
+            
+            if (!trimmedInput) {
+                return {
+                    isValid: false,
+                    errorMessage: '캔바 링크 또는 디자인 ID를 입력해주세요.'
+                };
+            }
+
+            for (const linkPattern of CANVA_LINK_PATTERNS) {
+                const match = trimmedInput.match(linkPattern.pattern);
+                if (match) {
+                    const designId = linkPattern.extractDesignId(match);
+                    
+                    return {
+                        isValid: true,
+                        designId
+                    };
+                }
+            }
+
+            return {
+                isValid: false,
+                errorMessage: '올바른 캔바 디자인 링크 또는 ID를 입력해주세요.'
+            };
+        }
+
+        function testValidation() {
+            const input = document.getElementById('urlInput').value;
+            const result = extractDesignIdFromUrl(input);
+            const resultDiv = document.getElementById('result');
+            
+            if (result.isValid) {
+                resultDiv.className = 'result success';
+                resultDiv.innerHTML = `
+                    <strong>✅ 검증 성공!</strong><br>
+                    디자인 ID: <code>${result.designId}</code>
+                `;
+            } else {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `
+                    <strong>❌ 검증 실패</strong><br>
+                    ${result.errorMessage}
+                `;
+            }
+        }
+
+        // 엔터 키 지원
+        document.getElementById('urlInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                testValidation();
+            }
+        });
+    </script>
+</body>
+</html>

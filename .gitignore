@@ -1,0 +1,42 @@
+
+# Dependencies
+node_modules/
+backend/node_modules/
+
+# Production builds
+dist/
+backend/dist/
+
+# Environment variables (보안상 중요!)
+.env
+.env.local
+.env.production.local
+backend/.env
+backend/.env.local
+
+# Database files
+*.sqlite
+*.sqlite3
+database.sqlite
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# AI version control directory
+.yoyo/
+.vooster/

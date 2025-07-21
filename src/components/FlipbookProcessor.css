@@ -1,0 +1,207 @@
+.flipbook-processor {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.processor-header {
+  text-align: center;
+  margin-bottom: 32px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.processor-header h3 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.processor-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 14px;
+}
+
+.processor-header code {
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: monospace;
+  color: #7c3aed;
+}
+
+.processor-loading {
+  margin: 32px 0;
+  min-height: 120px;
+}
+
+.processor-error {
+  margin: 24px 0;
+}
+
+.processor-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin: 32px 0;
+}
+
+.process-button {
+  background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 14px 0 rgba(124, 58, 237, 0.39);
+}
+
+.process-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(124, 58, 237, 0.49);
+}
+
+.process-button:active {
+  transform: translateY(0);
+}
+
+.cancel-button {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  padding: 12px 24px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cancel-button:hover {
+  background: #e5e7eb;
+  border-color: #9ca3af;
+}
+
+/* Demo Controls */
+.demo-controls {
+  margin-top: 48px;
+  padding-top: 24px;
+  border-top: 2px dashed #e5e7eb;
+}
+
+.demo-controls h4 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  color: #6b7280;
+  text-align: center;
+}
+
+.demo-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.demo-buttons button {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.demo-buttons button:hover {
+  background: #fee2e2;
+  border-color: #fca5a5;
+}
+
+/* Success State Animation */
+.processor-success {
+  text-align: center;
+  padding: 32px;
+  animation: successSlideIn 0.5s ease-out;
+}
+
+.success-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  animation: successBounce 0.6s ease-out 0.2s both;
+}
+
+.success-message {
+  font-size: 18px;
+  font-weight: 600;
+  color: #059669;
+  margin-bottom: 8px;
+}
+
+.success-details {
+  font-size: 14px;
+  color: #6b7280;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .flipbook-processor {
+    margin: 16px;
+    padding: 20px;
+  }
+  
+  .processor-header h3 {
+    font-size: 20px;
+  }
+  
+  .processor-actions {
+    flex-direction: column;
+  }
+  
+  .process-button,
+  .cancel-button {
+    width: 100%;
+  }
+  
+  .demo-buttons {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Animations */
+@keyframes successSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes successBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

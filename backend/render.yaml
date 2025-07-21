@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: flipcanva-backend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DB_PATH
+        value: /tmp/database.sqlite
+      - key: CORS_ORIGIN
+        value: https://your-username.github.io
+    # 무료 플랜 설정
+    plan: free
+    region: oregon
+    healthCheckPath: /api/canva/test
