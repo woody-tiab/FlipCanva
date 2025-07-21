@@ -257,6 +257,72 @@
   100% { transform: rotate(360deg); }
 }
 
+/* Success State Styles */
+.processor-success {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #d1fae5;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin: 16px 0;
+  animation: slideDown 0.3s ease-out;
+}
+
+.success-message {
+  padding: 24px;
+  border-left: 4px solid #10b981;
+}
+
+.success-message h4 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #065f46;
+}
+
+.success-message p {
+  margin: 0 0 20px 0;
+  font-size: 16px;
+  color: #374151;
+}
+
+.success-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.new-flipbook-button,
+.done-button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.new-flipbook-button {
+  background-color: #7c3aed;
+  color: white;
+}
+
+.new-flipbook-button:hover {
+  background-color: #6d28d9;
+}
+
+.done-button {
+  background-color: #10b981;
+  color: white;
+}
+
+.done-button:hover {
+  background-color: #059669;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .error-modal {
@@ -283,6 +349,16 @@
   .retry-button,
   .contact-button,
   .action-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .success-actions {
+    flex-direction: column;
+  }
+  
+  .new-flipbook-button,
+  .done-button {
     width: 100%;
     justify-content: center;
   }

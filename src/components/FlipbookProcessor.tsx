@@ -134,6 +134,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
   };
 
   const isProcessing = isLoading || isRetrying;
+  const isSuccess = processingStatus === 'success';
 
   return (
     <div className="flipbook-processor">
@@ -155,6 +156,35 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
         </div>
       )}
 
+      {/* Success State */}
+      {isSuccess && (
+        <div className="processor-success">
+          <div className="success-message">
+            <h4>✅ 플립북이 성공적으로 생성되었습니다!</h4>
+            <p>디자인 ID: <code>{designId}</code>로부터 플립북을 생성했습니다.</p>
+            <div className="success-actions">
+              <button 
+                className="new-flipbook-button"
+                onClick={() => {
+                  clearError();
+                  setStatus('idle');
+                }}
+              >
+                새 플립북 만들기
+              </button>
+              {onCancel && (
+                <button
+                  className="done-button"
+                  onClick={onCancel}
+                >
+                  완료
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Error State */}
       {hasError && currentError && (
         <div className="processor-error">
@@ -171,7 +201,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
       )}
 
       {/* Action Buttons */}
-      {!hasError && !isProcessing && (
+      {!hasError && !isProcessing && !isSuccess && (
         <div className="processor-actions">
           <button
             className="process-button"
