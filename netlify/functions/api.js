@@ -72,18 +72,27 @@ exports.handler = async (event, context) => {
   }
 
   try {
-    const path = event.path.replace('/.netlify/functions/api', '');
+    // Netlify에서 :splat으로 전달되는 경로 처리
+    const path = event.path.includes('/.netlify/functions/api') 
+      ? event.path.replace('/.netlify/functions/api', '')
+      : '/' + (event.queryStringParameters?.splat || '');
+    
     const method = event.httpMethod;
     const body = event.body ? JSON.parse(event.body) : {};
 
+    console.log('🎯 Original path:', event.path);
     console.log('🎯 Processed path:', path, 'Method:', method, 'Body:', body);
 
     // === CANVA API ROUTES ===
-    if (path.startsWith('/canva/')) {
-      const canvaPath = path.replace('/canva', '');
+    if (path.includes('/canva/') || path.includes('canva/')) {
+      const canvaPath = path.includes('/canva/') 
+        ? path.split('/canva/')[1] 
+        : path.split('canva/')[1];
+      
+      console.log('🎨 Canva route detected. canvaPath:', canvaPath);
       
       switch (true) {
-        case canvaPath === '/test' && method === 'GET':
+        case canvaPath === 'test' && method === 'GET':
           return {
             statusCode: 200,
             headers,
@@ -94,7 +103,7 @@ exports.handler = async (event, context) => {
             }),
           };
 
-        case canvaPath === '/validate-design' && method === 'POST':
+        case canvaPath === 'validate-design' && method === 'POST':
           const { designId } = body;
           const designIdPattern = /^DAG[a-zA-Z0-9_-]{8,}$/;
           const isValid = designIdPattern.test(designId);
@@ -121,7 +130,7 @@ exports.handler = async (event, context) => {
             }),
           };
 
-        case canvaPath === '/export-design' && method === 'POST':
+        case canvaPath === 'export-design' && method === 'POST':
           const { designId: exportDesignId, format = 'PNG' } = body;
           return {
             statusCode: 200,
