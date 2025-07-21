@@ -2,10 +2,12 @@ import React from 'react';
 import { useErrorHandler } from '../hooks/useErrorHandler';
 import { ErrorDisplay } from './ErrorDisplay';
 import { LoadingSpinner } from './LoadingSpinner';
+import FlipbookViewer from './FlipbookViewer';
 import { createAppError } from '../utils/errorMessages';
 import { ErrorCode } from '../types/error';
 import { canvaApiService } from '../services/canvaApi';
 import { flipbookApiService } from '../services/flipbookApi';
+import { FlipbookMetadata, PageMetadata } from '../types/flipbook';
 import './ErrorDisplay.css';
 import './LoadingSpinner.css';
 
@@ -22,6 +24,42 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
 }) => {
   const [isCompleted, setIsCompleted] = React.useState(false);
   const [completedResult, setCompletedResult] = React.useState<any>(null);
+  const [showViewer, setShowViewer] = React.useState(false);
+  const [currentPage, setCurrentPage] = React.useState(0);
+
+  // Mock 플립북 데이터를 실제 뷰어에서 사용할 수 있는 형태로 변환
+  const createViewerFlipbook = (result: any): FlipbookMetadata => {
+    const exportData = result.exportData;
+    const flipbookData = result.flipbook;
+    
+    const pages: PageMetadata[] = exportData?.pages?.map((page: any, index: number) => ({
+      id: page.id || `page_${index}`,
+      pageNumber: index + 1,
+      imageUrl: page.url,
+      aspectRatio: page.width && page.height ? page.width / page.height : 1.0,
+      hasTransparency: false,
+      title: `페이지 ${index + 1}`,
+      description: `${flipbookData?.title || '플립북'}의 ${index + 1}번째 페이지`
+    })) || [];
+
+    return {
+      id: flipbookData?.id || 'mock-flipbook',
+      title: flipbookData?.title || 'Mock 플립북',
+      description: flipbookData?.description || 'Mock 데이터로 생성된 플립북',
+      canvaDesignId: result.designId,
+      userId: flipbookData?.userId || 'demo-user',
+      status: 'published' as any,
+      visibility: 'private' as any,
+      pageCount: pages.length,
+      pages: pages,
+      createdAt: flipbookData?.createdAt || new Date().toISOString(),
+      updatedAt: flipbookData?.updatedAt || new Date().toISOString(),
+      viewCount: flipbookData?.viewCount || 0,
+      isFeatured: false,
+      tags: [],
+      categories: []
+    };
+  };
 
   const {
     hasError,
@@ -159,6 +197,39 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
     completedResult
   });
 
+  // 플립북 뷰어가 열려있는 경우
+  if (showViewer && completedResult) {
+    const viewerFlipbook = createViewerFlipbook(completedResult);
+    
+    return (
+      <div className="flipbook-viewer-container">
+        <div className="viewer-header">
+          <button
+            className="back-button"
+            onClick={() => setShowViewer(false)}
+          >
+            ← 뒤로 가기
+          </button>
+          <h3>{viewerFlipbook.title}</h3>
+          <div className="viewer-info">
+            <span>디자인 ID: {designId}</span>
+            <span>|</span>
+            <span>{viewerFlipbook.pageCount}페이지</span>
+          </div>
+        </div>
+        <div className="viewer-content">
+          <FlipbookViewer
+            flipbook={viewerFlipbook}
+            currentPage={currentPage}
+            onPageChange={setCurrentPage}
+            autoPlay={false}
+            controls={true}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flipbook-processor">
       <div className="processor-header">
@@ -200,8 +271,9 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
               <button 
                 className="view-flipbook-button"
                 onClick={() => {
-                  if (completedResult?.flipbook?.id) {
-                    alert(`플립북 ID: ${completedResult.flipbook.id}\n\n실제 플립북 뷰어는 향후 구현될 예정입니다.\n현재는 Mock 데이터로 플립북 생성을 시뮬레이션했습니다.`);
+                  if (completedResult) {
+                    setCurrentPage(0);
+                    setShowViewer(true);
                   }
                 }}
               >
