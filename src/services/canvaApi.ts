@@ -225,9 +225,9 @@ class CanvaApiService {
         data: {
           status: 'success',
           urls: [
-            { url: 'https://via.placeholder.com/800x1200/667eea/ffffff?text=Page+1' },
-            { url: 'https://via.placeholder.com/800x1200/764ba2/ffffff?text=Page+2' },
-            { url: 'https://via.placeholder.com/800x1200/a8e6cf/000000?text=Page+3' },
+            { url: 'https://via.placeholder.com/800x1200/667eea/FFFFFF?text=Page+1' },
+            { url: 'https://via.placeholder.com/800x1200/764ba2/FFFFFF?text=Page+2' },
+            { url: 'https://via.placeholder.com/800x1200/a8e6cf/FFFFFF?text=Page+3' },
           ]
         }
       };

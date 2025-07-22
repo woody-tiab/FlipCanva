@@ -60,6 +60,7 @@ function App() {
   };
 
   const handleShowAuth = () => {
+    console.log('🔗 Canva 연결하기 버튼 클릭됨');
     setShowAuth(true);
     setAuthError(null);
   };
