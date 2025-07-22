@@ -147,6 +147,11 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
 
     setStatus('loading', { currentStep: '완료!', progress: 100 });
 
+    console.log('🔥 processCanvaDesign results:');
+    console.log('🔥 validationResult.data:', validationResult.data);
+    console.log('🔥 exportResult.data:', exportResult.data);
+    console.log('🔥 flipbookResult.data:', flipbookResult.data);
+
     return {
       designId,
       flipbook: flipbookResult.data,
