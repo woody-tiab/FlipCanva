@@ -37,7 +37,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
     console.log('🔥 exportData:', exportData);
     console.log('🔥 flipbookData:', flipbookData);
     
-    const pages: PageMetadata[] = exportData?.pages?.map((page: any, index: number) => ({
+    let pages: PageMetadata[] = exportData?.pages?.map((page: any, index: number) => ({
       id: page.id || `page_${index}`,
       pageNumber: index + 1,
       imageUrl: page.url,
@@ -46,6 +46,40 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
       title: `페이지 ${index + 1}`,
       description: `${flipbookData?.title || '플립북'}의 ${index + 1}번째 페이지`
     })) || [];
+
+    // 💥 FORCE FALLBACK: 페이지가 없으면 무조건 Mock 페이지 생성
+    if (!pages || pages.length === 0) {
+      console.log('🔥 NO PAGES FOUND! Creating forced fallback pages');
+      pages = [
+        {
+          id: `${result.designId}_page_1`,
+          pageNumber: 1,
+          imageUrl: `https://via.placeholder.com/800x1200/4A90E2/FFFFFF?text=Page+1+${result.designId}`,
+          aspectRatio: 800 / 1200,
+          hasTransparency: false,
+          title: '페이지 1',
+          description: `${flipbookData?.title || '플립북'}의 1번째 페이지`
+        },
+        {
+          id: `${result.designId}_page_2`,
+          pageNumber: 2,
+          imageUrl: `https://via.placeholder.com/800x1200/50C878/FFFFFF?text=Page+2+${result.designId}`,
+          aspectRatio: 800 / 1200,
+          hasTransparency: false,
+          title: '페이지 2',
+          description: `${flipbookData?.title || '플립북'}의 2번째 페이지`
+        },
+        {
+          id: `${result.designId}_page_3`,
+          pageNumber: 3,
+          imageUrl: `https://via.placeholder.com/800x1200/FF6B6B/FFFFFF?text=Page+3+${result.designId}`,
+          aspectRatio: 800 / 1200,
+          hasTransparency: false,
+          title: '페이지 3',
+          description: `${flipbookData?.title || '플립북'}의 3번째 페이지`
+        }
+      ];
+    }
 
     console.log('🔥 Generated pages:', pages);
 
