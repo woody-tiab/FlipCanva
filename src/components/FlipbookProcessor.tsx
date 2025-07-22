@@ -61,7 +61,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
       const colors = ['667eea', '764ba2', 'a8e6cf'];
       
       pages = colors.map((color, index) => ({
-        id: `${result.designId}_page_${index + 1}`,
+        id: `${currentDesignId}_page_${index + 1}`,
         pageNumber: index + 1,
         imageUrl: `${baseUrl}/${color}/ffffff/png?text=Page+${index + 1}`,
         aspectRatio: 800 / 1200,
@@ -77,7 +77,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
       id: flipbookData?.id || 'mock-flipbook',
       title: flipbookData?.title || 'Mock 플립북',
       description: flipbookData?.description || 'Mock 데이터로 생성된 플립북',
-      canvaDesignId: result.designId,
+      canvaDesignId: currentDesignId,
       userId: flipbookData?.userId || 'demo-user',
       status: 'published' as any,
       visibility: 'private' as any,
@@ -127,16 +127,16 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
 
   const processCanvaDesign = async () => {
     // Check cache first
-    if (processCache.has(designId)) {
-      console.log('🎯 Using cached result for design:', designId);
-      return processCache.get(designId);
+    if (processCache.has(currentDesignId)) {
+      console.log('🎯 Using cached result for design:', currentDesignId);
+      return processCache.get(currentDesignId);
     }
     
     console.log('🚀 Starting process with Canva connection status:', isCanvaConnected);
     
     // Step 1: Validate Design
     setStatus('loading', { currentStep: 'Canva 디자인 검증 중...', progress: 10 });
-    const validationResult = await canvaApiService.validateDesign(designId);
+    const validationResult = await canvaApiService.validateDesign(currentDesignId);
     
     if (!validationResult.success) {
       throw createAppError(
@@ -148,7 +148,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
 
     // Step 2: Export Design to Images
     setStatus('loading', { currentStep: '페이지 이미지 내보내는 중...', progress: 40 });
-    const exportResult = await canvaApiService.exportDesign(designId, 'PNG');
+    const exportResult = await canvaApiService.exportDesign(currentDesignId, 'PNG');
     
     console.log('🔥 Raw exportResult:', exportResult);
     
@@ -166,23 +166,23 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
       const dataType = isCanvaConnected ? 'API 결과가 비어 있어' : 'Mock 모드이므로';
       console.log(`🔥 ${dataType} fallback 데이터를 생성합니다.`);
       actualExportData = {
-        designId,
+        designId: currentDesignId,
         format: 'PNG',
         pages: [
           {
-            id: `${designId}_page_1`,
+            id: `${currentDesignId}_page_1`,
             url: `https://placehold.co/800x1200/667eea/ffffff/png?text=Page+1`,
             width: 800,
             height: 1200,
           },
           {
-            id: `${designId}_page_2`,
+            id: `${currentDesignId}_page_2`,
             url: `https://placehold.co/800x1200/764ba2/ffffff/png?text=Page+2`,
             width: 800,
             height: 1200,
           },
           {
-            id: `${designId}_page_3`,
+            id: `${currentDesignId}_page_3`,
             url: `https://placehold.co/800x1200/a8e6cf/ffffff/png?text=Page+3`,
             width: 800,
             height: 1200,
@@ -199,9 +199,9 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
       progress: 70 
     });
     const flipbookData = {
-      title: validationResult.data?.designInfo?.title || `${isCanvaConnected ? 'Canva' : 'Mock'} Flipbook ${designId}`,
-      description: `${isCanvaConnected ? 'Canva API' : 'Mock 데이터'}로 생성된 플립북 (${designId})`,
-      canvaDesignId: designId,
+      title: validationResult.data?.designInfo?.title || `${isCanvaConnected ? 'Canva' : 'Mock'} Flipbook ${currentDesignId}`,
+      description: `${isCanvaConnected ? 'Canva API' : 'Mock 데이터'}로 생성된 플립북 (${currentDesignId})`,
+      canvaDesignId: currentDesignId,
       userId: 'demo-user'
     };
 
@@ -218,15 +218,15 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
     setStatus('loading', { currentStep: '완료!', progress: 100 });
 
     const result = {
-      designId,
+      designId: currentDesignId,
       flipbook: flipbookResult.data,
       exportData: actualExportData,
       validationData: validationResult.data
     };
     
     // Cache the result
-    setProcessCache(prev => new Map(prev.set(designId, result)));
-    console.log('🎯 Cached result for design:', designId);
+    setProcessCache(prev => new Map(prev.set(currentDesignId, result)));
+    console.log('🎯 Cached result for design:', currentDesignId);
 
     return result;
   };
@@ -301,7 +301,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
           </button>
           <h3>{viewerFlipbook.title}</h3>
           <div className="viewer-info">
-            <span>디자인 ID: {designId}</span>
+            <span>디자인 ID: {currentDesignId}</span>
             <span>|</span>
             <span>{viewerFlipbook.pageCount}페이지</span>
           </div>
@@ -353,7 +353,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
         <div className="processor-success">
           <div className="success-message">
             <h4>✅ 플립북이 성공적으로 생성되었습니다!</h4>
-            <p>디자인 ID: <code>{designId}</code>로부터 플립북을 생성했습니다.</p>
+            <p>디자인 ID: <code>{currentDesignId}</code>로부터 플립북을 생성했습니다.</p>
             {completedResult && (
               <div className="flipbook-details">
                 <h5>생성된 플립북 정보:</h5>

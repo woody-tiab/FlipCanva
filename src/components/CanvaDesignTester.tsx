@@ -54,15 +54,23 @@ export const CanvaDesignTester: React.FC<CanvaDesignTesterProps> = ({
       
       // 2. 연결된 경우 실제 디자인 정보 가져오기
       let designInfo = null;
-      if (canvaApiService.getAccessToken()) {
+      const hasToken = canvaApiService.getAccessToken();
+      
+      if (hasToken) {
         try {
+          console.log('🔍 Attempting to get real design info for:', designId);
           const designResult = await canvaApiService.getDesign(designId);
           if (designResult.success) {
             designInfo = designResult.data;
+            console.log('✅ Got real design info:', designInfo);
+          } else {
+            console.log('⚠️ Design API failed:', designResult.error);
           }
         } catch (error) {
-          console.log('Real design info failed, using validation result');
+          console.log('❌ Real design info failed:', error);
         }
+      } else {
+        console.log('🔒 No access token, skipping real design fetch');
       }
 
       setTestResult({

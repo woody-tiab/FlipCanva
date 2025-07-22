@@ -64,6 +64,24 @@ export const CanvaConnectionStatus: React.FC<CanvaConnectionStatusProps> = ({
 
   useEffect(() => {
     checkConnection();
+    
+    // Listen for storage changes to detect OAuth completion
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'canva_access_token') {
+        console.log('🔄 Token change detected, rechecking connection...');
+        setTimeout(checkConnection, 500); // Small delay to ensure token is fully set
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check periodically in case storage event doesn't fire
+    const interval = setInterval(checkConnection, 30000); // Every 30 seconds
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
   }, []);
 
   const getStatusIcon = () => {

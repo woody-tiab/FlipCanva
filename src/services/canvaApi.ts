@@ -201,6 +201,13 @@ class CanvaApiService {
   // Access Token 설정
   setAccessToken(token: string) {
     this.accessToken = token;
+    if (token) {
+      localStorage.setItem('canva_access_token', token);
+      console.log('🔐 Canva access token saved to localStorage');
+    } else {
+      localStorage.removeItem('canva_access_token');
+      console.log('🗑️ Canva access token removed from localStorage');
+    }
   }
 
   // Token management
