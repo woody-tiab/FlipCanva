@@ -30,19 +30,19 @@ const mockExportData = (designId) => ({
   pages: [
     {
       id: `${designId}_page_1`,
-      url: `https://picsum.photos/800/1200?random=1`,
+      url: `https://via.placeholder.com/800x1200/667eea/ffffff?text=Page+1`,
       width: 800,
       height: 1200,
     },
     {
       id: `${designId}_page_2`,
-      url: `https://picsum.photos/800/1200?random=2`,
+      url: `https://via.placeholder.com/800x1200/764ba2/ffffff?text=Page+2`,
       width: 800,
       height: 1200,
     },
     {
       id: `${designId}_page_3`,
-      url: `https://picsum.photos/800/1200?random=3`,
+      url: `https://via.placeholder.com/800x1200/a8e6cf/000000?text=Page+3`,
       width: 800,
       height: 1200,
     }

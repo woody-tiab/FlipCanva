@@ -54,7 +54,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
         {
           id: `${result.designId}_page_1`,
           pageNumber: 1,
-          imageUrl: `https://picsum.photos/800/1200?random=1`,
+          imageUrl: `https://via.placeholder.com/800x1200/667eea/ffffff?text=Page+1`,
           aspectRatio: 800 / 1200,
           hasTransparency: false,
           title: '페이지 1',
@@ -63,7 +63,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
         {
           id: `${result.designId}_page_2`,
           pageNumber: 2,
-          imageUrl: `https://picsum.photos/800/1200?random=2`,
+          imageUrl: `https://via.placeholder.com/800x1200/764ba2/ffffff?text=Page+2`,
           aspectRatio: 800 / 1200,
           hasTransparency: false,
           title: '페이지 2',
@@ -72,7 +72,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
         {
           id: `${result.designId}_page_3`,
           pageNumber: 3,
-          imageUrl: `https://picsum.photos/800/1200?random=3`,
+          imageUrl: `https://via.placeholder.com/800x1200/a8e6cf/000000?text=Page+3`,
           aspectRatio: 800 / 1200,
           hasTransparency: false,
           title: '페이지 3',
@@ -172,19 +172,19 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
         pages: [
           {
             id: `${designId}_page_1`,
-            url: `https://picsum.photos/800/1200?random=1`,
+            url: `https://via.placeholder.com/800x1200/667eea/ffffff?text=Page+1`,
             width: 800,
             height: 1200,
           },
           {
             id: `${designId}_page_2`,
-            url: `https://picsum.photos/800/1200?random=2`,
+            url: `https://via.placeholder.com/800x1200/764ba2/ffffff?text=Page+2`,
             width: 800,
             height: 1200,
           },
           {
             id: `${designId}_page_3`,
-            url: `https://picsum.photos/800/1200?random=3`,
+            url: `https://via.placeholder.com/800x1200/a8e6cf/000000?text=Page+3`,
             width: 800,
             height: 1200,
           }
