@@ -45,13 +45,13 @@ class CanvaApiService {
   private accessToken: string | null = null;
 
   // OAuth 인증 URL 생성
-  generateAuthUrl(state?: string): string {
+  async generateAuthUrl(state?: string): Promise<string> {
     if (!CANVA_CLIENT_ID) {
       throw new Error('Canva Client ID가 설정되지 않았습니다.');
     }
 
     const codeVerifier = this.generateCodeVerifier();
-    const codeChallenge = this.generateCodeChallenge(codeVerifier);
+    const codeChallenge = await this.generateCodeChallenge(codeVerifier);
     
     // PKCE verifier를 저장 (실제로는 secure storage 사용 필요)
     sessionStorage.setItem('canva_code_verifier', codeVerifier);
@@ -59,7 +59,7 @@ class CanvaApiService {
     const params = new URLSearchParams({
       client_id: CANVA_CLIENT_ID,
       response_type: 'code',
-      scope: 'design:read design:meta:read asset:read folder:read',
+      scope: 'design:read design:meta:read asset:read',
       code_challenge: codeChallenge,
       code_challenge_method: 'S256',
       redirect_uri: import.meta.env.VITE_CANVA_REDIRECT_URI || window.location.origin + '/auth/callback',
@@ -80,15 +80,14 @@ class CanvaApiService {
   }
 
   // PKCE Code Challenge 생성
-  private generateCodeChallenge(verifier: string): string {
+  private async generateCodeChallenge(verifier: string): Promise<string> {
     const encoder = new TextEncoder();
     const data = encoder.encode(verifier);
-    return crypto.subtle.digest('SHA-256', data).then(hash => {
-      return btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(hash))))
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=/g, '');
-    });
+    const hash = await crypto.subtle.digest('SHA-256', data);
+    return btoa(String.fromCharCode.apply(null, Array.from(new Uint8Array(hash))))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=/g, '');
   }
 
   // 실제 Canva API 호출

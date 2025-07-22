@@ -33,8 +33,8 @@ export const CanvaAuth: React.FC<CanvaAuthProps> = ({
     setIsAuthenticating(true);
     
     try {
-      // 실제로는 백엔드에서 토큰 교환 처리
-      const response = await fetch('/api/canva/auth/callback', {
+      // Netlify Functions를 통한 토큰 교환
+      const response = await fetch('/.netlify/functions/canva-auth', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -45,25 +45,30 @@ export const CanvaAuth: React.FC<CanvaAuthProps> = ({
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      const data = await response.json();
+
+      if (data.success && data.access_token) {
         onAuthSuccess(data.access_token);
         
         // URL 정리
         window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // 성공 메시지
+        alert('🎉 Canva 인증 성공! 이제 실제 Canva 디자인을 사용할 수 있습니다.');
       } else {
-        throw new Error('토큰 교환 실패');
+        throw new Error(data.error?.message || '토큰 교환 실패');
       }
     } catch (error) {
+      console.error('Auth callback error:', error);
       onAuthError(error instanceof Error ? error.message : '인증 처리 중 오류가 발생했습니다.');
     } finally {
       setIsAuthenticating(false);
     }
   };
 
-  const initiateAuth = () => {
+  const initiateAuth = async () => {
     try {
-      const url = canvaApiService.generateAuthUrl();
+      const url = await canvaApiService.generateAuthUrl();
       setAuthUrl(url);
       
       // 새 창에서 인증 페이지 열기
