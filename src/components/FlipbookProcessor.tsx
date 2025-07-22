@@ -6,26 +6,33 @@ import FlipbookViewer from './FlipbookViewer';
 import { createAppError } from '../utils/errorMessages';
 import { ErrorCode } from '../types/error';
 import { canvaApiService } from '../services/canvaApi';
+import { CanvaConnectionStatus } from './CanvaConnectionStatus';
+import { CanvaDesignTester } from './CanvaDesignTester';
 import { flipbookApiService } from '../services/flipbookApi';
 import { FlipbookMetadata, PageMetadata } from '../types/flipbook';
 import './ErrorDisplay.css';
 import './LoadingSpinner.css';
 
 interface FlipbookProcessorProps {
-  designId: string;
+  designId?: string;
   onSuccess?: (result: any) => void;
   onCancel?: () => void;
+  onDesignIdChange?: (designId: string) => void;
 }
 
-export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
-  designId,
+export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = React.memo(({
+  designId: initialDesignId,
   onSuccess,
-  onCancel
+  onCancel,
+  onDesignIdChange
 }) => {
   const [isCompleted, setIsCompleted] = React.useState(false);
   const [completedResult, setCompletedResult] = React.useState<any>(null);
   const [showViewer, setShowViewer] = React.useState(false);
   const [currentPage, setCurrentPage] = React.useState(0);
+  const [processCache, setProcessCache] = React.useState<Map<string, any>>(new Map());
+  const [isCanvaConnected, setIsCanvaConnected] = React.useState<boolean>(false);
+  const [currentDesignId, setCurrentDesignId] = React.useState<string>(initialDesignId || '');
 
   // Mock 플립북 데이터를 실제 뷰어에서 사용할 수 있는 형태로 변환
   const createViewerFlipbook = (result: any): FlipbookMetadata => {
@@ -47,38 +54,21 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
       description: `${flipbookData?.title || '플립북'}의 ${index + 1}번째 페이지`
     })) || [];
 
-    // 💥 FORCE FALLBACK: 페이지가 없으면 무조건 Mock 페이지 생성
+    // 💥 OPTIMIZED FALLBACK: 페이지가 없으면 효율적인 Mock 페이지 생성
     if (!pages || pages.length === 0) {
-      console.log('🔥 NO PAGES FOUND! Creating forced fallback pages');
-      pages = [
-        {
-          id: `${result.designId}_page_1`,
-          pageNumber: 1,
-          imageUrl: `https://placehold.co/800x1200/667eea/ffffff/png?text=Page+1`,
-          aspectRatio: 800 / 1200,
-          hasTransparency: false,
-          title: '페이지 1',
-          description: `${flipbookData?.title || '플립북'}의 1번째 페이지`
-        },
-        {
-          id: `${result.designId}_page_2`,
-          pageNumber: 2,
-          imageUrl: `https://placehold.co/800x1200/764ba2/ffffff/png?text=Page+2`,
-          aspectRatio: 800 / 1200,
-          hasTransparency: false,
-          title: '페이지 2',
-          description: `${flipbookData?.title || '플립북'}의 2번째 페이지`
-        },
-        {
-          id: `${result.designId}_page_3`,
-          pageNumber: 3,
-          imageUrl: `https://placehold.co/800x1200/a8e6cf/ffffff/png?text=Page+3`,
-          aspectRatio: 800 / 1200,
-          hasTransparency: false,
-          title: '페이지 3',
-          description: `${flipbookData?.title || '플립북'}의 3번째 페이지`
-        }
-      ];
+      console.log('🔥 NO PAGES FOUND! Creating optimized fallback pages');
+      const baseUrl = 'https://placehold.co/800x1200';
+      const colors = ['667eea', '764ba2', 'a8e6cf'];
+      
+      pages = colors.map((color, index) => ({
+        id: `${result.designId}_page_${index + 1}`,
+        pageNumber: index + 1,
+        imageUrl: `${baseUrl}/${color}/ffffff/png?text=Page+${index + 1}`,
+        aspectRatio: 800 / 1200,
+        hasTransparency: false,
+        title: `페이지 ${index + 1}`,
+        description: `${flipbookData?.title || '플립북'}의 ${index + 1}번째 페이지`
+      }));
     }
 
     console.log('🔥 Generated pages:', pages);
@@ -136,6 +126,14 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
   });
 
   const processCanvaDesign = async () => {
+    // Check cache first
+    if (processCache.has(designId)) {
+      console.log('🎯 Using cached result for design:', designId);
+      return processCache.get(designId);
+    }
+    
+    console.log('🚀 Starting process with Canva connection status:', isCanvaConnected);
+    
     // Step 1: Validate Design
     setStatus('loading', { currentStep: 'Canva 디자인 검증 중...', progress: 10 });
     const validationResult = await canvaApiService.validateDesign(designId);
@@ -144,7 +142,7 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
       throw createAppError(
         ErrorCode.CANVA_TIMEOUT,
         validationResult.error?.message || 'Canva 디자인 검증에 실패했습니다.',
-        `Design ID: ${designId}`
+        `Design ID: ${currentDesignId}`
       );
     }
 
@@ -158,14 +156,15 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
       throw createAppError(
         ErrorCode.CANVA_TIMEOUT,
         exportResult.error?.message || 'Canva 이미지 내보내기에 실패했습니다.',
-        `Design ID: ${designId}`
+        `Design ID: ${currentDesignId}`
       );
     }
 
-    // 임시: exportResult가 올바르지 않다면 Mock 데이터를 직접 생성
+    // 연결 상태에 따른 데이터 처리
     let actualExportData = exportResult.data;
     if (!actualExportData?.pages) {
-      console.log('🔥 Export result has no pages, creating mock data');
+      const dataType = isCanvaConnected ? 'API 결과가 비어 있어' : 'Mock 모드이므로';
+      console.log(`🔥 ${dataType} fallback 데이터를 생성합니다.`);
       actualExportData = {
         designId,
         format: 'PNG',
@@ -195,12 +194,15 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
     }
 
     // Step 3: Create Flipbook
-    setStatus('loading', { currentStep: '플립북 생성 중...', progress: 70 });
+    setStatus('loading', { 
+      currentStep: '플립북 데이터베이스에 저장 중...', 
+      progress: 70 
+    });
     const flipbookData = {
-      title: validationResult.data?.designInfo?.title || `Flipbook ${designId}`,
-      description: `Canva 디자인 ${designId}에서 생성된 플립북`,
+      title: validationResult.data?.designInfo?.title || `${isCanvaConnected ? 'Canva' : 'Mock'} Flipbook ${designId}`,
+      description: `${isCanvaConnected ? 'Canva API' : 'Mock 데이터'}로 생성된 플립북 (${designId})`,
       canvaDesignId: designId,
-      userId: 'demo-user' // TODO: 실제 사용자 ID 사용
+      userId: 'demo-user'
     };
 
     const flipbookResult = await flipbookApiService.createFlipbook(flipbookData);
@@ -209,23 +211,24 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
       throw createAppError(
         ErrorCode.UPLOAD_FAILED,
         flipbookResult.error?.message || '플립북 생성에 실패했습니다.',
-        `Design ID: ${designId}`
+        `Design ID: ${currentDesignId}`
       );
     }
 
     setStatus('loading', { currentStep: '완료!', progress: 100 });
 
-    console.log('🔥 processCanvaDesign results:');
-    console.log('🔥 validationResult.data:', validationResult.data);
-    console.log('🔥 actualExportData:', actualExportData);
-    console.log('🔥 flipbookResult.data:', flipbookResult.data);
-
-    return {
+    const result = {
       designId,
       flipbook: flipbookResult.data,
       exportData: actualExportData,
       validationData: validationResult.data
     };
+    
+    // Cache the result
+    setProcessCache(prev => new Map(prev.set(designId, result)));
+    console.log('🎯 Cached result for design:', designId);
+
+    return result;
   };
 
   const handleProcess = async () => {
@@ -269,16 +272,19 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
   const isProcessing = isLoading || isRetrying;
   const isSuccess = isCompleted && !hasError;
 
-  // 디버깅용 로그
-  console.log('🔍 FlipbookProcessor render:', {
-    isProcessing,
-    isSuccess,
-    isCompleted,
-    processingStatus,
-    hasError,
-    currentError,
-    completedResult
-  });
+  // 성능 최적화: 디버깅 로그를 조건부로만 출력
+  React.useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔍 FlipbookProcessor state change:', {
+        isProcessing,
+        isSuccess,
+        isCompleted,
+        processingStatus,
+        hasError,
+        cacheSize: processCache.size
+      });
+    }
+  }, [isProcessing, isSuccess, isCompleted, processingStatus, hasError, processCache.size]);
 
   // 플립북 뷰어가 열려있는 경우
   if (showViewer && completedResult) {
@@ -317,7 +323,16 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
     <div className="flipbook-processor">
       <div className="processor-header">
         <h3>플립북 생성</h3>
-        <p>디자인 ID: <code>{designId}</code></p>
+        {currentDesignId && (
+          <p>디자인 ID: <code>{currentDesignId}</code></p>
+        )}
+        
+        {/* Canva Connection Status */}
+        <div style={{ marginTop: '16px' }}>
+          <CanvaConnectionStatus 
+            onConnectionChange={setIsCanvaConnected}
+          />
+        </div>
       </div>
 
       {/* Loading State */}
@@ -442,4 +457,6 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
       </div>
     </div>
   );
-};
+});
+
+FlipbookProcessor.displayName = 'FlipbookProcessor';

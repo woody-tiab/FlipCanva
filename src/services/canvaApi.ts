@@ -1,6 +1,34 @@
 // Production에서는 같은 도메인을 사용하므로 빈 문자열 사용 (상대 경로)
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '' : 'http://localhost:3002');
 
+// API Response Cache
+class ApiCache {
+  private cache = new Map<string, { data: any; timestamp: number }>();
+  private readonly TTL = 5 * 60 * 1000; // 5분
+
+  get(key: string) {
+    const cached = this.cache.get(key);
+    if (!cached) return null;
+    
+    if (Date.now() - cached.timestamp > this.TTL) {
+      this.cache.delete(key);
+      return null;
+    }
+    
+    return cached.data;
+  }
+
+  set(key: string, data: any) {
+    this.cache.set(key, { data, timestamp: Date.now() });
+  }
+
+  clear() {
+    this.cache.clear();
+  }
+}
+
+const apiCache = new ApiCache();
+
 // Canva API Configuration
 const CANVA_CLIENT_ID = import.meta.env.VITE_CANVA_CLIENT_ID || 'OC-AZgwBpp_n5_R';
 const CANVA_API_BASE_URL = import.meta.env.VITE_CANVA_API_BASE_URL || 'https://api.canva.com/rest/v1';
@@ -175,6 +203,33 @@ class CanvaApiService {
     this.accessToken = token;
   }
 
+  // Token management
+  getAccessToken(): string | null {
+    return this.accessToken;
+  }
+
+  clearTokens(): void {
+    this.accessToken = null;
+    this.refreshToken = null;
+    localStorage.removeItem('canva_access_token');
+    localStorage.removeItem('canva_refresh_token');
+  }
+
+  // 사용자 정보 가져오기
+  async getCurrentUser(): Promise<ApiResponse<any>> {
+    if (!this.accessToken) {
+      return {
+        success: false,
+        error: {
+          message: 'No access token available',
+          code: 'NO_TOKEN'
+        }
+      };
+    }
+    
+    return this.makeCanvaRequest('/users/me');
+  }
+
   // 실제 Canva 디자인 가져오기
   async getDesign(designId: string): Promise<ApiResponse<any>> {
     if (this.accessToken) {
@@ -238,6 +293,13 @@ class CanvaApiService {
     designId: string, 
     userId?: string
   ): Promise<ApiResponse<DesignValidationResult>> {
+    const cacheKey = `validate_${designId}_${userId || 'anonymous'}`;
+    const cached = apiCache.get(cacheKey);
+    if (cached) {
+      console.log('🎯 Using cached validation for design:', designId);
+      return cached;
+    }
+    
     // 실제 API 사용 시 getDesign 호출
     const designResult = await this.getDesign(designId);
     
@@ -251,7 +313,9 @@ class CanvaApiService {
         }
       };
     } else {
-      return designResult as ApiResponse<DesignValidationResult>;
+      const result = designResult as ApiResponse<DesignValidationResult>;
+      apiCache.set(cacheKey, result);
+      return result;
     }
   }
 
@@ -287,10 +351,23 @@ class CanvaApiService {
     }
     
     // Fallback to Mock API
-    return this.makeRequest<ExportResult>('/export-design', {
+    const exportCacheKey = `export_${designId}_${format}_${userId || 'anonymous'}`;
+    const cachedExport = apiCache.get(exportCacheKey);
+    if (cachedExport) {
+      console.log('🎯 Using cached export for design:', designId);
+      return cachedExport;
+    }
+    
+    const result = await this.makeRequest<ExportResult>('/export-design', {
       method: 'POST',
       body: JSON.stringify({ designId, format, userId }),
     });
+    
+    if (result.success) {
+      apiCache.set(exportCacheKey, result);
+    }
+    
+    return result;
   }
 
   async getDesignInfo(
@@ -325,3 +402,14 @@ class CanvaApiService {
 }
 
 export const canvaApiService = new CanvaApiService();
+
+// Initialize token from localStorage on startup
+if (typeof window !== 'undefined') {
+  const savedToken = localStorage.getItem('canva_access_token');
+  const savedRefreshToken = localStorage.getItem('canva_refresh_token');
+  
+  if (savedToken && savedRefreshToken) {
+    canvaApiService['accessToken'] = savedToken;
+    canvaApiService['refreshToken'] = savedRefreshToken;
+  }
+}

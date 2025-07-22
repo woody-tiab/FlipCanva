@@ -13,6 +13,7 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [showAuth, setShowAuth] = useState(false);
+  const [currentDesignId, setCurrentDesignId] = useState<string>(''); // 기본 테스트 ID
 
   // 페이지 로드 시 저장된 토큰 확인
   useEffect(() => {
@@ -37,12 +38,18 @@ function App() {
 
   const handleValidDesignId = (designId: string) => {
     setValidatedDesignId(designId);
+    setCurrentDesignId(designId);
     console.log('유효한 디자인 ID:', designId);
   };
 
   const handleValidationError = (error: string) => {
     setValidatedDesignId(null);
     console.error('검증 오류:', error);
+  };
+  
+  const handleDesignIdChange = (designId: string) => {
+    setCurrentDesignId(designId);
+    setValidatedDesignId(designId);
   };
 
   const handleAuthSuccess = (accessToken: string) => {
@@ -151,20 +158,20 @@ function App() {
           />
         </section>
 
-        {validatedDesignId && (
-          <section className="result-section">
-            <FlipbookProcessor
-              designId={validatedDesignId}
-              onSuccess={(result) => {
-                console.log('Flipbook created successfully:', result);
-                // TODO: Navigate to flipbook viewer
-              }}
-              onCancel={() => {
-                setValidatedDesignId(null);
-              }}
-            />
-          </section>
-        )}
+        <section className="result-section">
+          <FlipbookProcessor
+            designId={currentDesignId || validatedDesignId}
+            onDesignIdChange={handleDesignIdChange}
+            onSuccess={(result) => {
+              console.log('Flipbook created successfully:', result);
+              // TODO: Navigate to flipbook viewer
+            }}
+            onCancel={() => {
+              setValidatedDesignId(null);
+              setCurrentDesignId('');
+            }}
+          />
+        </section>
       </main>
 
       <footer className="app-footer">
