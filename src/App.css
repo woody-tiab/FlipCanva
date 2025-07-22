@@ -140,6 +140,24 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.auth-logout-btn {
+  padding: 8px 16px;
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.auth-logout-btn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
 /* 인증 섹션 */
 .auth-section {
   position: relative;

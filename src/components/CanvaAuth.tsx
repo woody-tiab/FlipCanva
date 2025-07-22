@@ -48,6 +48,10 @@ export const CanvaAuth: React.FC<CanvaAuthProps> = ({
       const data = await response.json();
 
       if (data.success && data.access_token) {
+        // 토큰을 localStorage에 저장
+        localStorage.setItem('canva_access_token', data.access_token);
+        localStorage.setItem('canva_token_expires', Date.now() + (data.expires_in * 1000));
+        
         onAuthSuccess(data.access_token);
         
         // URL 정리
@@ -71,17 +75,8 @@ export const CanvaAuth: React.FC<CanvaAuthProps> = ({
       const url = await canvaApiService.generateAuthUrl();
       setAuthUrl(url);
       
-      // 새 창에서 인증 페이지 열기
-      const authWindow = window.open(url, 'canva-auth', 'width=500,height=600');
-      
-      // 인증 완료 확인을 위한 polling
-      const checkClosed = setInterval(() => {
-        if (authWindow?.closed) {
-          clearInterval(checkClosed);
-          // 페이지 새로고침하여 URL 파라미터 확인
-          window.location.reload();
-        }
-      }, 1000);
+      // 현재 창에서 직접 이동 (더 안정적)
+      window.location.href = url;
       
     } catch (error) {
       onAuthError(error instanceof Error ? error.message : 'Canva 인증 URL 생성 실패');

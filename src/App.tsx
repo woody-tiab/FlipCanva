@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CanvaLinkInput } from './components/CanvaLinkInput';
 import { FlipbookProcessor } from './components/FlipbookProcessor';
 import { CanvaAuth } from './components/CanvaAuth';
@@ -13,6 +13,27 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
   const [showAuth, setShowAuth] = useState(false);
+
+  // 페이지 로드 시 저장된 토큰 확인
+  useEffect(() => {
+    const savedToken = localStorage.getItem('canva_access_token');
+    const tokenExpires = localStorage.getItem('canva_token_expires');
+    
+    if (savedToken && tokenExpires) {
+      const expiresAt = parseInt(tokenExpires);
+      if (Date.now() < expiresAt) {
+        // 토큰이 유효함
+        canvaApiService.setAccessToken(savedToken);
+        setIsAuthenticated(true);
+        console.log('✅ 저장된 Canva 토큰으로 자동 로그인됨');
+      } else {
+        // 토큰 만료
+        localStorage.removeItem('canva_access_token');
+        localStorage.removeItem('canva_token_expires');
+        console.log('⚠️ Canva 토큰이 만료되어 제거됨');
+      }
+    }
+  }, []);
 
   const handleValidDesignId = (designId: string) => {
     setValidatedDesignId(designId);
@@ -43,6 +64,15 @@ function App() {
     setAuthError(null);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('canva_access_token');
+    localStorage.removeItem('canva_token_expires');
+    canvaApiService.setAccessToken('');
+    setIsAuthenticated(false);
+    setAuthError(null);
+    console.log('🚪 Canva 로그아웃 완료');
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -52,7 +82,15 @@ function App() {
         {/* Canva 인증 상태 표시 */}
         <div className="auth-status">
           {isAuthenticated ? (
-            <span className="auth-success">✅ Canva 연동됨 (실제 API)</span>
+            <div className="auth-actions-header">
+              <span className="auth-success">✅ Canva 연동됨 (실제 API)</span>
+              <button 
+                className="auth-logout-btn"
+                onClick={handleLogout}
+              >
+                🚪 연결 해제
+              </button>
+            </div>
           ) : (
             <div className="auth-actions-header">
               <span className="auth-warning">⚠️ Mock 데이터 사용 중</span>

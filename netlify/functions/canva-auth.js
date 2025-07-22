@@ -24,6 +24,12 @@ exports.handler = async (event, context) => {
     const CLIENT_ID = process.env.CANVA_CLIENT_ID || 'OC-AZgwBpp_n5_R';
     const CLIENT_SECRET = process.env.CANVA_CLIENT_SECRET;
     
+    console.log('🔧 Environment check:', {
+      CLIENT_ID: CLIENT_ID ? `${CLIENT_ID.substring(0, 5)}...` : 'NOT_SET',
+      CLIENT_SECRET: CLIENT_SECRET ? `${CLIENT_SECRET.substring(0, 5)}...` : 'NOT_SET',
+      env_keys: Object.keys(process.env).filter(k => k.includes('CANVA'))
+    });
+    
     if (!CLIENT_SECRET) {
       return {
         statusCode: 500,
@@ -32,7 +38,10 @@ exports.handler = async (event, context) => {
           success: false,
           error: {
             message: 'Canva Client Secret이 설정되지 않았습니다.',
-            code: 'CONFIG_ERROR'
+            code: 'CONFIG_ERROR',
+            debug: {
+              available_env: Object.keys(process.env).filter(k => k.includes('CANVA'))
+            }
           }
         }),
       };
@@ -101,6 +110,23 @@ exports.handler = async (event, context) => {
           token_type: tokenData.token_type,
           expires_in: tokenData.expires_in,
           scope: tokenData.scope
+        }),
+      };
+    }
+
+    if (event.httpMethod === 'GET') {
+      // 테스트 엔드포인트
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          message: 'Canva Auth function is working!',
+          environment: {
+            CLIENT_ID: CLIENT_ID ? `${CLIENT_ID.substring(0, 5)}...` : 'NOT_SET',
+            CLIENT_SECRET: CLIENT_SECRET ? 'SET' : 'NOT_SET',
+            available_env: Object.keys(process.env).filter(k => k.includes('CANVA'))
+          }
         }),
       };
     }
