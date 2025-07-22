@@ -29,8 +29,13 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
 
   // Mock 플립북 데이터를 실제 뷰어에서 사용할 수 있는 형태로 변환
   const createViewerFlipbook = (result: any): FlipbookMetadata => {
+    console.log('🔥 createViewerFlipbook input:', result);
+    
     const exportData = result.exportData;
     const flipbookData = result.flipbook;
+    
+    console.log('🔥 exportData:', exportData);
+    console.log('🔥 flipbookData:', flipbookData);
     
     const pages: PageMetadata[] = exportData?.pages?.map((page: any, index: number) => ({
       id: page.id || `page_${index}`,
@@ -42,7 +47,9 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
       description: `${flipbookData?.title || '플립북'}의 ${index + 1}번째 페이지`
     })) || [];
 
-    return {
+    console.log('🔥 Generated pages:', pages);
+
+    const flipbook = {
       id: flipbookData?.id || 'mock-flipbook',
       title: flipbookData?.title || 'Mock 플립북',
       description: flipbookData?.description || 'Mock 데이터로 생성된 플립북',
@@ -59,6 +66,9 @@ export const FlipbookProcessor: React.FC<FlipbookProcessorProps> = ({
       tags: [],
       categories: []
     };
+
+    console.log('🔥 Final flipbook metadata:', flipbook);
+    return flipbook;
   };
 
   const {
