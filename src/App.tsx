@@ -63,6 +63,17 @@ function App() {
     console.log('🔗 Canva 연결하기 버튼 클릭됨');
     setShowAuth(true);
     setAuthError(null);
+    
+    // 버튼 클릭 시각적 피드백
+    const button = document.querySelector('.auth-connect-btn');
+    if (button) {
+      button.textContent = '🔄 연결 중...';
+      setTimeout(() => {
+        if (button.textContent === '🔄 연결 중...') {
+          button.textContent = '🔗 Canva 연결하기';
+        }
+      }, 3000);
+    }
   };
 
   const handleLogout = () => {

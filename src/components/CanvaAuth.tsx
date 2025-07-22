@@ -57,8 +57,10 @@ export const CanvaAuth: React.FC<CanvaAuthProps> = ({
         // URL 정리
         window.history.replaceState({}, document.title, window.location.pathname);
         
-        // 성공 메시지
-        alert('🎉 Canva 인증 성공! 이제 실제 Canva 디자인을 사용할 수 있습니다.');
+        // 성공 메시지 - 더 눈에 띄게
+        setTimeout(() => {
+          alert('🎉 Canva 인증 완료!\n\n✅ 실제 Canva 디자인을 사용할 수 있습니다.\n✅ 상단에 "Canva 연동됨" 표시를 확인하세요.\n\n이제 Canva 링크를 입력하여 플립북을 만들어보세요!');
+        }, 500);
       } else {
         throw new Error(data.error?.message || '토큰 교환 실패');
       }
@@ -73,15 +75,21 @@ export const CanvaAuth: React.FC<CanvaAuthProps> = ({
   const initiateAuth = async () => {
     try {
       console.log('🔗 Canva 인증 시작...');
+      setIsAuthenticating(true);
+      
       const url = await canvaApiService.generateAuthUrl();
       console.log('✅ 인증 URL 생성 성공:', url.substring(0, 50) + '...');
       setAuthUrl(url);
+      
+      // 사용자에게 리다이렉트 안내
+      alert('🔗 Canva 인증 페이지로 이동합니다. 인증 완료 후 자동으로 돌아옵니다.');
       
       // 현재 창에서 직접 이동 (더 안정적)
       window.location.href = url;
       
     } catch (error) {
       console.error('❌ Canva 인증 URL 생성 실패:', error);
+      setIsAuthenticating(false);
       onAuthError(error instanceof Error ? error.message : 'Canva 인증 URL 생성 실패');
     }
   };
