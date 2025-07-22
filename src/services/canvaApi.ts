@@ -211,15 +211,15 @@ class CanvaApiService {
     if (this.accessToken) {
       return this.makeCanvaRequest(`/exports/${exportId}`);
     } else {
-      // Mock에서는 즉시 완료된 것으로 처리
+      // Mock에서는 즉시 완료된 것으로 처리 - CORS 이슈 없는 이미지 사용
       return {
         success: true,
         data: {
           status: 'success',
           urls: [
-            { url: 'https://picsum.photos/800/1200?random=1' },
-            { url: 'https://picsum.photos/800/1200?random=2' },
-            { url: 'https://picsum.photos/800/1200?random=3' },
+            { url: 'https://via.placeholder.com/800x1200/667eea/ffffff?text=Page+1' },
+            { url: 'https://via.placeholder.com/800x1200/764ba2/ffffff?text=Page+2' },
+            { url: 'https://via.placeholder.com/800x1200/a8e6cf/000000?text=Page+3' },
           ]
         }
       };
