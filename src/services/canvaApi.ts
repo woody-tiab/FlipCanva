@@ -2,9 +2,17 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? '' : 'http://localhost:3002');
 
 // Canva API Configuration
-const CANVA_CLIENT_ID = import.meta.env.VITE_CANVA_CLIENT_ID;
+const CANVA_CLIENT_ID = import.meta.env.VITE_CANVA_CLIENT_ID || 'OC-AZgwBpp_n5_R';
 const CANVA_API_BASE_URL = import.meta.env.VITE_CANVA_API_BASE_URL || 'https://api.canva.com/rest/v1';
 const CANVA_AUTH_URL = import.meta.env.VITE_CANVA_AUTH_URL || 'https://www.canva.com/api/oauth/authorize';
+
+// Debug log environment variables
+console.log('🔧 Canva API Config:', {
+  CLIENT_ID: CANVA_CLIENT_ID ? `${CANVA_CLIENT_ID.substring(0, 5)}...` : 'NOT_SET',
+  API_BASE_URL: CANVA_API_BASE_URL,
+  AUTH_URL: CANVA_AUTH_URL,
+  env_available: Object.keys(import.meta.env).filter(k => k.includes('CANVA'))
+});
 
 export interface ApiResponse<T> {
   success: boolean;

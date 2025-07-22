@@ -72,13 +72,16 @@ export const CanvaAuth: React.FC<CanvaAuthProps> = ({
 
   const initiateAuth = async () => {
     try {
+      console.log('🔗 Canva 인증 시작...');
       const url = await canvaApiService.generateAuthUrl();
+      console.log('✅ 인증 URL 생성 성공:', url.substring(0, 50) + '...');
       setAuthUrl(url);
       
       // 현재 창에서 직접 이동 (더 안정적)
       window.location.href = url;
       
     } catch (error) {
+      console.error('❌ Canva 인증 URL 생성 실패:', error);
       onAuthError(error instanceof Error ? error.message : 'Canva 인증 URL 생성 실패');
     }
   };
